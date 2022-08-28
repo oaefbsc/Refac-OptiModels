@@ -7,7 +7,7 @@ El modelo de pre-optimización original, __03_PreOPtiRefs.mod__,  fue diseñado 
 
 La refactorización del código original fue hecha en Julia v1.7.2 , utiliza el pquete de modelado de optimización matemática JuMP v1.1.1 y el solver GLPK v1.0.1
 
-El respositorio contine:
+El respositorio contiene:
 - refac_preoptirefs.jl
 - 03_PreOPtiRefs.mod
 - refac_PreOptiRefs_v1.0.out
