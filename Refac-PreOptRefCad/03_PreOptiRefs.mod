@@ -1,23 +1,23 @@
 /*
-		Modelo de pre-optimización de la refinería de Cadereyta
-		Rafael García Jolly
+		Modelo de pre-optimizaciÃ³n de la refinerÃ­a de Cadereyta
+		Rafael GarcÃ­a Jolly
 		20220627
 		
-		Datos: Cubo de la refinería calculado por Jonathan Grimaldo
+		Datos: Cubo de la refinerÃ­a calculado por Jonathan Grimaldo
 		en archivos *.csv
 		
 */
-# Definición de identificadores y parámetros de tablas
-	set REFINERIA;					#Refinería
+# DefiniciÃ³n de identificadores y parÃ¡metros de tablas
+	set REFINERIA;					#RefinerÃ­a
 	set CRUDO;						# Tipos de crudo
-	set MODOPER;					# Modo de operación (lambdas)
+	set MODOPER;					# Modo de operaciÃ³n (lambdas)
 	set PRODUCTO;					# Productos terminados
 	set PLANTA;						# Plantas de proceso
-	set RLCP, dimen 4;				#Refinería_Modoper_Crudo_Producto
-	set RLCF dimen 4;				#Refinería_Modoper_Crudo_Planta
-	set RC dimen 2;					#Refinería_Crudo
-	set RP dimen 2;					#Refinería_Producto
-	set RF dimen 2;					#Refinería_Planta
+	set RLCP, dimen 4;				#RefinerÃ­a_Modoper_Crudo_Producto
+	set RLCF dimen 4;				#RefinerÃ­a_Modoper_Crudo_Planta
+	set RC dimen 2;					#RefinerÃ­a_Crudo
+	set RP dimen 2;					#RefinerÃ­a_Producto
+	set RF dimen 2;					#RefinerÃ­a_Planta
 
 
 	param YIELDS{RLCP};
@@ -42,7 +42,7 @@
 	table tpesado IN "CSV" "MaxPes.csv" :
 		REFINERIA <- [refineria], MINPES ~ minimo, MAXPES ~ maximo;
 
-# Comprobación de lectura de tablas
+# ComprobaciÃ³n de lectura de tablas
 /*
 	display YIELDS;
 	display USOPLAN;
@@ -54,27 +54,27 @@
 	display CRUDO, MODOPER, PRODUCTO, PLANTA;
 */
 
-# Declaración de variables
+# DeclaraciÃ³n de variables
 	var PROCESO {REFINERIA,
-					CRUDO}, >=0;			# Crudo por tipo procesado en la refinería
+					CRUDO}, >=0;			# Crudo por tipo procesado en la refinerÃ­a
 	var DESTIPRIM {REFINERIA,
 					MODOPER,
-					CRUDO}, >=0;			# Proceso de crudo por modo de operación
+					CRUDO}, >=0;			# Proceso de crudo por modo de operaciÃ³n
 	var PRODUCCION {REFINERIA,
-					PRODUCTO}, >=0;			# Producción de petrolíferos en refinería
+					PRODUCTO}, >=0;			# ProducciÃ³n de petrolÃ­feros en refinerÃ­a
 	var USOCAP {REFINERIA,
-					PLANTA}, >=0;			# Capacidad utilizada de plantas en refinería
+					PLANTA}, >=0;			# Capacidad utilizada de plantas en refinerÃ­a
 	var LAMBDA {REFINERIA,
-					MODOPER}, integer;		# Modo de operación
-	var INGRESO {REFINERIA}; 				# Ventas a puerta de refinería
-	var EGRESO {REFINERIA}; 				# Costo de producción en refinería
+					MODOPER}, integer;		# Modo de operaciÃ³n
+	var INGRESO {REFINERIA}; 				# Ventas a puerta de refinerÃ­a
+	var EGRESO {REFINERIA}; 				# Costo de producciÃ³n en refinerÃ­a
 	var INGRESOTOT;							# Ingresos totales
 	var EGRESOTOT;							# Egresos totales
 
-# Inicia la optimización
+# Inicia la optimizaciÃ³n
 /*__________________________________________________________
 */
-# Función objetivo
+# FunciÃ³n objetivo
 	maximize Z: INGRESOTOT - EGRESOTOT;
 	s.t. TOTING: INGRESOTOT = sum {r in REFINERIA} INGRESO[r];
 	s.t. TOTEGR: EGRESOTOT = sum {r in REFINERIA} EGRESO[r];
@@ -87,13 +87,13 @@
 	s.t. PROCRU {r in REFINERIA, c in CRUDO} :
 				PROCESO[r,c] = 
 				sum{l in MODOPER} DESTIPRIM[r,l,c];
-# Mínimo crudo pesado
+# MÃ­nimo crudo pesado
 	s.t. MNPES {r in REFINERIA} :
 				PROCESO[r,'MAY'] >= MINPES[r]*sum{c in CRUDO} PROCESO[r,c];
-# Máximo crudo pesado
+# MÃ¡ximo crudo pesado
 	s.t. MXPES {r in REFINERIA} :
 				PROCESO[r,'MAY'] <= MAXPES[r]*sum{c in CRUDO} PROCESO[r,c];
-# Producción
+# ProducciÃ³n
 	s.t. RENDIM {r in REFINERIA, p in PRODUCTO} :
 				PRODUCCION[r,p] = 
 				sum{l in MODOPER, c in CRUDO} DESTIPRIM[r,l,c]*YIELDS[r,l,c,p];
@@ -103,7 +103,7 @@
 				sum {l in MODOPER, c in CRUDO} DESTIPRIM[r,l,c]*USOPLAN[r,l,c,f];
 	s.t. KAPMAX {r in REFINERIA, f in PLANTA} :
 				USOCAP[r,f] <= CAPAMAX[r,f];
-# Control de modo de operación
+# Control de modo de operaciÃ³n
 	s.t. MOPER {r in REFINERIA, l in MODOPER} :
 				sum {c in CRUDO} DESTIPRIM[r,l,c] <= LAMBDA[r,l]*CAPAMAX[r,'ATM'];
 	s.t. MOUNICO{r in REFINERIA}: sum{l in MODOPER} LAMBDA[r,l]=1;
@@ -119,13 +119,13 @@ display LAMBDA;
 
 
 
-# Datos adicionales de nomenclatura (éstos no cambian)
+# Datos adicionales de nomenclatura (Ã©stos no cambian)
 	data;
 	set CRUDO :=	IST	MAY;
 				#  	Istmo	Maya
 	set MODOPER := L1 L2 L3 L4;
 				#  Lambdas
 	set PRODUCTO :=	LPG	GNA	DSL	COM	CKE;
-				#  Ligeros, Gasolinas, Diésel, Combustóleo, Coque
+				#  Ligeros, Gasolinas, DiÃ©sel, CombustÃ³leo, Coque
 	set PLANTA :=	ATM	VAC	REF	FCC	COK;
-				#  Primaria, Vacío, Reformadora, FCC, Coquizadora
+				#  Primaria, VacÃ­o, Reformadora, FCC, Coquizadora
